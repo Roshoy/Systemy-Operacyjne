@@ -1,0 +1,20 @@
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.150000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 2.600000e-01 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.500000e-01 s
+System time: 5.200000e-01 s
+User time: 1.200000e-01 s

@@ -1,0 +1,13 @@
+Biorąc pod uwagę złożoność O(n^2) zastosowanego sortowania
+można spodziewać się, że test dla 13500 bloków wykona się
+2.25 razy dłużej niż dla 9000 bloków (1.5^2). To można też
+zaobserwować np dla rozmiaru 4096 B dla sortowania funkcjami
+systemowymi czas systemowy jest 2,35 razy dłuższy.
+Dla rozmiaru bloku mniejszego lub równego 1024 B łatwo zauważyć,
+że czasy dla funkcji bibliotecznych są około 2 razu mniejsze
+niż dla funkjci systemowych, zaś dla większych rozmiarów bloków
+funkcje systemowe mogą być nawet troszkę szybsze, np dla 8 kB
+mamy około 5s mniej zarówno na czasie użytkownika oraz na
+czasie systemowym.
+Kopiowanie jest znacznie szybsze od sortowania, ale tylko ze
+względu na złożoność algorytmu.

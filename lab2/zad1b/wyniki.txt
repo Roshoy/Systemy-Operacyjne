@@ -1,0 +1,72 @@
+Blocks: 9000   Of size: 1 B
+sort_sys:  UserTime: 6.340000 s   SystemTime: 17.340000 s
+sort_lib:  UserTime: 4.440000 s   SystemTime: 5.950000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.000000 s
+
+Blocks: 13500   Of size: 1 B
+sort_sys:  UserTime: 14.400000 s   SystemTime: 38.720000 s
+sort_lib:  UserTime: 10.130000 s   SystemTime: 13.120000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.000000 s
+
+Blocks: 9000   Of size: 4 B
+sort_sys:  UserTime: 6.350000 s   SystemTime: 16.630000 s
+sort_lib:  UserTime: 4.520000 s   SystemTime: 5.400000 s
+copy_sys:  UserTime: 0.010000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.000000 s
+
+Blocks: 13500   Of size: 4 B
+sort_sys:  UserTime: 14.000000 s   SystemTime: 37.700000 s
+sort_lib:  UserTime: 9.820000 s   SystemTime: 12.730000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.000000 s
+
+Blocks: 9000   Of size: 512 B
+sort_sys:  UserTime: 6.350000 s   SystemTime: 18.840000 s
+sort_lib:  UserTime: 5.330000 s   SystemTime: 8.680000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.010000 s
+
+Blocks: 13500   Of size: 512 B
+sort_sys:  UserTime: 14.070000 s   SystemTime: 41.690000 s
+sort_lib:  UserTime: 12.000000 s   SystemTime: 19.350000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.010000 s
+
+Blocks: 9000   Of size: 1024 B
+sort_sys:  UserTime: 6.380000 s   SystemTime: 20.270000 s
+sort_lib:  UserTime: 6.040000 s   SystemTime: 11.660000 s
+copy_sys:  UserTime: 0.010000 s   SystemTime: 0.020000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.010000 s
+
+Blocks: 13500   Of size: 1024 B
+sort_sys:  UserTime: 14.210000 s   SystemTime: 46.160000 s
+sort_lib:  UserTime: 13.470000 s   SystemTime: 26.670000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.030000 s
+copy_lib:  UserTime: 0.010000 s   SystemTime: 0.010000 s
+
+Blocks: 9000   Of size: 4096 B
+sort_sys:  UserTime: 6.340000 s   SystemTime: 31.720000 s
+sort_lib:  UserTime: 8.200000 s   SystemTime: 32.890000 s
+copy_sys:  UserTime: 0.010000 s   SystemTime: 0.030000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.030000 s
+
+Blocks: 13500   Of size: 4096 B
+sort_sys:  UserTime: 13.960000 s   SystemTime: 74.680000 s
+sort_lib:  UserTime: 18.090000 s   SystemTime: 75.080000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.050000 s
+copy_lib:  UserTime: 0.010000 s   SystemTime: 0.050000 s
+
+Blocks: 9000   Of size: 8192 B
+sort_sys:  UserTime: 6.130000 s   SystemTime: 50.780000 s
+sort_lib:  UserTime: 8.150000 s   SystemTime: 50.720000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.070000 s
+copy_lib:  UserTime: 0.000000 s   SystemTime: 0.060000 s
+
+Blocks: 13500   Of size: 8192 B
+sort_sys:  UserTime: 13.980000 s   SystemTime: 113.800000 s
+sort_lib:  UserTime: 18.670000 s   SystemTime: 118.390000 s
+copy_sys:  UserTime: 0.000000 s   SystemTime: 0.090000 s
+copy_lib:  UserTime: 0.010000 s   SystemTime: 0.110000 s
+

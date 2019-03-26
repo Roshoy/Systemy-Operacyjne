@@ -1,0 +1,208 @@
+Komendy:
+create_table 10
+search_directory 10 tmp 1 / *
+add_block
+remove_block 0
+add_remove 1000
+exit
+
+-O2:
+STATIC:
+create_table:
+Real time: 1.000000e-02 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.210000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 1.000000e-02 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.370000e+00 s
+System time: 4.770000e+00 s
+User time: 1.300000e+00 s
+
+SHARED:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.080000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 1.000000e-02 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.440000e+00 s
+System time: 4.820000e+00 s
+User time: 1.300000e+00 s
+
+DYNAMIC:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.200000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.390000e+00 s
+System time: 4.780000e+00 s
+User time: 1.280000e+00 s
+
+-O3:
+STATIC:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.310000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.450000e+00 s
+System time: 4.780000e+00 s
+User time: 1.330000e+00 s
+
+SHARED:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.140000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.370000e+00 s
+System time: 4.760000e+00 s
+User time: 1.280000e+00 s
+
+DYNAMIC:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.180000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.380000e+00 s
+System time: 4.770000e+00 s
+User time: 1.270000e+00 s
+
+-Os:
+STATIC:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.240000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.350000e+00 s
+System time: 4.760000e+00 s
+User time: 1.280000e+00 s
+
+SHARED:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.220000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 1.000000e-02 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.470000e+00 s
+System time: 4.870000e+00 s
+User time: 1.280000e+00 s
+
+DYNAMIC:
+create_table:
+Real time: 0.000000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+search_directory:
+Real time: 9.190000e+00 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_block:
+Real time: 1.000000e-02 s
+System time: 1.000000e-02 s
+User time: 0.000000e+00 s
+remove_block:
+Real time: 1.000000e-02 s
+System time: 0.000000e+00 s
+User time: 0.000000e+00 s
+add_remove:
+Real time: 6.170000e+00 s
+System time: 4.650000e+00 s
+User time: 1.240000e+00 s
