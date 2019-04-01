@@ -5,7 +5,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-int stopped = 0;
+int alive = 0;
+pid_t child;
 
 void print_timestamp(){
     time_t t = time(NULL);
@@ -14,35 +15,44 @@ void print_timestamp(){
         tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 }
 
-void au2(int signum){
+void make_child(){
+    child = fork();
+    alive = 1;
+    if(child == 0){
+        if(-1 == execl("./date_script.sh","./date_script.sh",NULL)){
+            printf("Nie udany execl\n");
+            exit(-1);
+        }
+    }
+    
+}
+
+void signalINT(int signum){
+    if(alive)kill(child, SIGKILL);
+    wait(NULL);
     exit(0);
 }
 
-void au(int signum){
-    
-    if(!stopped){
+void signalTSTP(int signum){    
+    if(alive){
         printf("Oczekuję na CTRL+Z - kontynuacja albo CTR+C - zakończenie programu\n");
-        stopped = 1;
+        kill(child, SIGKILL);
+        wait(NULL);
+        alive = 0;
     }else{
         printf("Kontynuacja\n");
-        stopped = 0;
+        make_child();
     }        
 }
 
-int main(int argc, char **argv){
-    signal(SIGTSTP, au);
-    signal(SIGINT, au2);
-        
-    //while(1) {
-        int child = fork();
-        if(child == 0){
-            execl("/bin/sh","while true; do date; done",NULL);
-        }else{
-            
-                wait(NULL);
-            
-        }
 
-   // }
+
+int main(int argc, char **argv){
+    signal(SIGTSTP, signalTSTP);
+    signal(SIGINT, signalINT);
+    make_child();
+    while(1) {
+        sleep(1);
+    }
     return 0;
 }

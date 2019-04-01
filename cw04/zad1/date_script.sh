@@ -1,4 +1,4 @@
-while true
-do
-echo `date`
+#!/usr/bin/env bash
+while true; do
+    echo `date`
 done
