@@ -11,7 +11,6 @@ int RECEIVED = 0;
 int done = 0;
 
 void receive(int signum, siginfo_t *info, void* unused){
-    
     if(signum == SIGUSR1 || signum == SIGRTMIN)RECEIVED++;
     else if(signum == SIGUSR2 || signum == SIGRTMAX){
         SENDER_PID = info->si_pid;
