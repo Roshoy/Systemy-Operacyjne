@@ -91,6 +91,8 @@ void with_sigrt(){
 }
 
 int main(int argc, char **argv){
+    sigset_t new_mask;
+    sigfillset(&new_mask);
     if(argc < 4){
         printf("Not enough arguments\n");
         return 1;
@@ -99,12 +101,21 @@ int main(int argc, char **argv){
     CATCHER_PID = atoi(argv[1]);
     if(strcmp("KILL", argv[3]) == 0){
         //kill...
+        sigdelset(&new_mask, SIGUSR1);
+        sigdelset(&new_mask, SIGUSR2);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_kill();
     }else if(strcmp("SIGQUEUE", argv[3]) == 0){
         //sigqueue...
+        sigdelset(&new_mask, SIGUSR1);
+        sigdelset(&new_mask, SIGUSR2);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_sigqueue();
     }else if(strcmp("SIGRT", argv[3]) == 0){
         //sigrt...
+        sigdelset(&new_mask, SIGRTMIN);
+        sigdelset(&new_mask, SIGRTMAX);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_sigrt();
     }
     return 0;

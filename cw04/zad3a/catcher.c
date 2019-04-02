@@ -82,19 +82,31 @@ void with_sigrt(){
 }
 
 int main(int argc, char **argv){
+    printf("Catcher pid: %d\n",getpid());
+    sigset_t new_mask;
+    sigfillset(&new_mask);
     if(argc < 2){
         printf("Not enough arguments\n");
         return 1;
     }
-    printf("Catcher pid: %d\n",getpid());
+
     if(strcmp("KILL", argv[1]) == 0){
         //kill...
+        sigdelset(&new_mask, SIGUSR1);
+        sigdelset(&new_mask, SIGUSR2);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_kill();
     }else if(strcmp("SIGQUEUE", argv[1]) == 0){
         //sigqueue...
+        sigdelset(&new_mask, SIGUSR1);
+        sigdelset(&new_mask, SIGUSR2);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_sigqueue();
     }else if(strcmp("SIGRT", argv[1]) == 0){
         //sigrt...
+        sigdelset(&new_mask, SIGRTMIN);
+        sigdelset(&new_mask, SIGRTMAX);
+        sigprocmask(SIG_SETMASK, &new_mask, NULL);
         with_sigrt();
     }
     return 0;
