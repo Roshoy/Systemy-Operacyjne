@@ -190,7 +190,7 @@ int main(int argc, char** argv){
     file = fopen(list_path, "r");    
     if(!file)rise_error("Can't open list file\n");
     childs_running = create_new_monitor(file);
-    
+    command_parser("LIST");
     signal(SIGINT, end_all);
     while(end == 0){
         char scan[5];
