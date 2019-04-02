@@ -9,13 +9,12 @@
 #include <sys/resource.h>
 #include <libgen.h>
 
-unsigned int work_time;
-
 time_t last_modification;
 char* last_content_buffer;
 int changes;
 char* path;
 char* archive_path;
+int run = 1;
 
 void rise_error(char* text){
     perror(text);
@@ -25,6 +24,21 @@ void rise_error(char* text){
 void rise_errno(){
     perror(NULL);
     exit(-1);
+}
+
+void signal_usr1(int signum){
+    if(signum == SIGUSR1) {
+        run = 0;
+        printf("PID: %d is stopped\n", (int)getpid());
+    }
+    else if(signum == SIGUSR2){
+        run = 1;
+        printf("PID: %d is started\n", (int)getpid());
+    }
+    else if(signum == SIGINT){
+        run = 2;
+        printf("PID: %d is ended\n", (int)getpid());
+    }
 }
 
 int update_content_buffer(){
@@ -105,56 +119,51 @@ int observe( unsigned int cycle_time){
     double passed_time = 0;
     cycle_start_time = start_time;
 
+    signal(SIGUSR1, signal_usr1);
+    signal(SIGUSR2, signal_usr1);
+    signal(SIGINT, signal_usr1);
     do{          
-        //////////////here it works
+        if(run == 0){
+            pause();
+        }
+        if(run == 2){
+            break;
+        }
         if(file_was_modified() == 0){
             save_content();
             update_content_buffer();
             update_mod_date();
             changes++;
-        }
-        
-        //////////////here it ends work
+        }        
         check_time = clock();
         double passed_time_cycle = (double)(check_time - 
             cycle_start_time)/CLOCKS_PER_SEC;
         passed_time += passed_time_cycle;
-        double to_work_end = work_time - passed_time;
         double to_next_cycle = cycle_time - passed_time_cycle;
 
-        if(to_work_end > 0 && to_next_cycle > 0){
-            if(to_work_end < to_next_cycle){
-                return 0;
-            }            
+        if(to_next_cycle > 0){       
             sleep((unsigned int)to_next_cycle);
             passed_time_cycle += (unsigned int)to_next_cycle;
         }     
         
         check_time = clock();
-        do{            
-            time_t buff = clock();
-            passed_time_cycle += (double)(buff-check_time)/CLOCKS_PER_SEC;
-            check_time = buff;            
-        }while(passed_time_cycle < cycle_time);
-        passed_time += passed_time_cycle;        
         cycle_start_time = check_time;
-    }while(passed_time < work_time);
+    }while(1);
     return 0;
 }
 
 
 int main(int argc, char** argv){            
     changes = 0;
-    if(argc < 4){
+    if(argc < 3){
         perror("Not enough arguments\n");
         return -1;
     }
     archive_path = "./archive";
-    work_time = atoi(argv[2]);
     last_content_buffer = malloc(1);
     if(!last_content_buffer)rise_error("Can't allocate memory\n");
     path = argv[1];
-    observe(atoi(argv[3]));
+    observe(atoi(argv[2]));
     free(last_content_buffer);
     return changes;
 }

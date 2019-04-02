@@ -1,9 +1,8 @@
 CFLAGS = -O1 -Wall
 
-all: monitor_buff.c monitor.c monitor_exec.c
+all: monitor_buff.c monitor.c
 	make monitor_buff
-	make monitor
-	make monitor_exec
+	make monitor	
 	make clear
 
 monitor_buff: monitor_buff.c
@@ -13,10 +12,6 @@ monitor_buff: monitor_buff.c
 monitor: monitor.c
 	gcc -c $(CFLAGS) monitor.c -g -o monitor.o
 	gcc monitor.o -g $(CFLAGS) -L ./ -o monitor
-
-monitor_exec: monitor_exec.c
-	gcc -c $(CFLAGS) monitor_exec.c -g -o monitor_exec.o
-	gcc monitor_exec.o -g $(CFLAGS) -L ./ -o monitor_exec
 
 tester: tester.c
 	gcc -c $(CFLAGS) tester.c -g -o tester.o
