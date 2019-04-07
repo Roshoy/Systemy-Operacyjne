@@ -71,13 +71,19 @@ mother
             if( i == commands_count-1){ 
                 printf("close\n");
                 close(fd[i*2]);
-            }
-            
+            }            
                 printf("out\n");
                 dup2(fd[i*2+1],STDOUT_FILENO);
             
             if(-1 == execvp(args[0],args))rise_errno();
         }else{
+            if(i != 0){
+                
+                close(fd[i*2-2]);
+            }
+                
+                close(fd[i*2+1]);
+            
             int r;
             printf("out\n");
             wait(&r);
