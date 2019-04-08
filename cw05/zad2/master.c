@@ -24,6 +24,7 @@ int main(int argc, char **argv){
         if(-1 == mkfifo(fifo_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)){
         }else{
             fifo = open(fifo_path, O_RDONLY);
+            if(fifo < 0)rise_errno();
         }
     }    
     char* str = calloc(59, 1);

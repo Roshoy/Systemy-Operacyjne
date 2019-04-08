@@ -9,7 +9,7 @@ int main(){
     pid_t master = fork();
     if(master == 0){
         if(-1 == execl("./master", "./master", "./fifo",NULL)){
-            printf("zjebales\n");
+            printf("couldn't run master\n");
             exit(1);
         }
     }
@@ -17,7 +17,7 @@ int main(){
         pid_t slave = fork();
         if(slave == 0){
             if(-1 == execl("./slave", "./slave", "./fifo", "10", NULL)){
-                printf("zjebales slave\n");
+                printf("couldn't run slave\n");
                 exit(1);
             }
         }
