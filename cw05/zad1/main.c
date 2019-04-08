@@ -88,9 +88,7 @@ int main(int argc, char **argv){
                     close(fd[i*2-2]);
                 }                
                     close(fd[i*2+1]);            
-                int r;
-                wait(&r);
-                if(r!=0)rise_error("Process terminated with error\n");
+                
             }
             free(args);
         }
@@ -101,11 +99,15 @@ int main(int argc, char **argv){
         strncpy(next_arg, buff, size);
         free(commands);
         if(next_arg){
-            printf("\n\nResult\n\n");
+            printf("Result\n");
             printf("%s\n",next_arg);
             free(next_arg);
         }
-        
+        for(;commands_count>0;commands_count--){
+            int r;
+            wait(&r);
+            if(r!=0)rise_error("Process terminated with error\n");
+        }
         free(line);
         line = NULL;
     }

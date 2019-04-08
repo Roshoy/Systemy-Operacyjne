@@ -6,38 +6,30 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-char* fifo_path = "./fifo";
-int fifo;
-void child_function(){
-    const char *some = "Some nice shit\n";
-    //int s = open(fifo_path, O_WRONLY);
-    if(fifo < 0)printf("child didn't open\n");
-    write(fifo, some, 15);
-    close(fifo);
+void rise_error(const char* mess){
+    perror(mess);
+    exit(1);
+}
+
+void rise_errno(){
+    perror(NULL);
+    exit(1);
 }
 
 int main(int argc, char **argv){
-    fifo = open(fifo_path, O_RDWR);
-    printf("fifo opened withour mkfifo\n");
+    if(argc < 2)rise_error("Too few arguments! \n Arguments: pipe_name\n");
+    char* fifo_path = argv[1];
+    int fifo = open(fifo_path, O_RDWR);
     if(fifo < 0){
-        if(-1 == mkfifo(fifo_path,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)){
-            printf("mkfifo failed\n");
+        if(-1 == mkfifo(fifo_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)){
         }else{
             fifo = open(fifo_path, O_RDONLY);
-            printf("mkfifo win\n");
         }
-    }else{
-        printf("fifo opened withour mkfifo\n");
-    }
-    
-    char* str = calloc(40, 1);
-        while(0 < read(fifo, str, 15)){
+    }    
+    char* str = calloc(59, 1);
+    while(0 < read(fifo, str, 58)){
         printf("%s\n", str);
     }
     close(fifo);
-
-
-
     return 0;
 }
