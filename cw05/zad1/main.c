@@ -87,12 +87,13 @@ int main(int argc, char **argv){
                 if(i != 0){                
                     close(fd[i*2-2]);
                 }                
-                    close(fd[i*2+1]);            
+                    close(fd[i*2+1]);     
+                //if(i == commands_count - 1)dup2(STDOUT_FILENO, fd[2*i]);      
                 
             }
             free(args);
         }
-
+        
         char buff[300];
         int size = read(fd[2*commands_count - 2], buff, 300);
         next_arg = calloc(size+1, 1);
