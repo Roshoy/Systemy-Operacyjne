@@ -9,9 +9,9 @@
 void f();
 
 int main(int argc, char **argv){
-    printf("A\n");
-    atexit(f);
-    printf("C\n");
+    int d;
+    int s = scanf("%d",&d);
+    printf("\n%d\n%d\n", d, s);
     return 0;
 }
 
