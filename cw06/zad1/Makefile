@@ -16,6 +16,5 @@ server: server.c
 client: client.c
 	$(CC) client.c -o client
 
-
 clear:
 	rm  -f *.o *.a *.so

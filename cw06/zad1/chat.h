@@ -2,7 +2,7 @@
 #define CHAT_H
 
 #define MAX_MSG_LENGTH 1000
-#define SERVER_SEED 2
+#define SERVER_SEED 3
 #define PERMISSIONS 0666
 
 enum RqsType{
@@ -14,7 +14,8 @@ enum RqsType{
     DEL = 11,
     TOALL = 15,
     TOFRIENDS = 19,
-    TOONE = 23
+    TOONE = 23,
+    ECHO = 27
 }RqsType;
 
 struct Msg{
@@ -24,6 +25,5 @@ struct Msg{
     int sender_id;
     int other_id;
 }Msg;
-
 
 #endif  

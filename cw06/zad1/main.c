@@ -9,9 +9,12 @@
 void f();
 
 int main(int argc, char **argv){
-    int d;
-    int s = scanf("%d",&d);
-    printf("\n%d\n%d\n", d, s);
+    char *s = "23 34 65";
+    long int x;
+    char *pEnd;
+    x = strtol(s, &pEnd, 10);
+    printf("%ld\n", x);
+    while((x = strtol(pEnd, &pEnd, 10)) != 0L)printf("%ld\n", x);
     return 0;
 }
 

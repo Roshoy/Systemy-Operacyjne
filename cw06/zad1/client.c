@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include "chat.h"
 
+FILE *stream;
 int child;
 int server_id;
 int queue_id;
@@ -25,6 +26,7 @@ void delete_friend();
 void to_all();
 void to_friends();
 void to_one();
+void echo();
 
 void bye_function();
 void sigint_handler(int);
@@ -36,14 +38,22 @@ void input_to_upper(char *input);
 
 int main(int argc, char **argv){    
     atexit(bye_function);
+    stream = stdin;
+    if(argc == 2)stream = fopen(argv[1], "r");
     sigset_t cl_sig_mask;
     sigfillset(&cl_sig_mask);
     sigdelset(&cl_sig_mask, SIGINT);
     signal(SIGINT, sigint_handler);
     key_t server_key = ftok(getenv("HOME"), SERVER_SEED);
-    printf("%s 1\n", strerror(errno));
+    if(server_key == -1){
+        printf("%s ftok server\n", strerror(errno));
+        exit(1);
+    }
     server_id = msgget(server_key, PERMISSIONS);
-    if(-1 == server_id)printf("%s 3\n", strerror(errno));
+    if(-1 == server_id){
+        printf("%s get server qid\n", strerror(errno));
+        exit(1);
+    }
     init();
     child = fork();
     if(child != 0){
@@ -67,7 +77,7 @@ void input_to_upper(char *input){
 
 void parse_input(){
     char input[20];
-    scanf("%s", input);
+    if(EOF == fscanf(stream, "%s", input))stream = stdin;
     input_to_upper(input);
     if(strcmp(input, "STOP") == 0){
         exit(0);
@@ -85,22 +95,26 @@ void parse_input(){
         add_friend();
     }else if(strcmp(input, "DELETE") == 0){
         delete_friend();
+    }else if(strcmp(input, "ECHO") == 0){
+        echo();
     }else{
-        printf("Unknown command\n");
+        printf("Unknown command %s\n",input);
+        sleep(1);
     }
 }
 
 void bye_function(){
-    msgctl(queue_id, IPC_RMID, NULL);
+    if(child == 0)msgctl(queue_id, IPC_RMID, NULL);
     kill(child, SIGINT);
     if(msg_buff.rqs_type != STOP){
         msg_buff.sender_id = client_id;
         send_msg(STOP);
     }
+    if(stream != stdin)fclose(stream);
+    if(child != 0)printf("Shutting down client\n");
 }
 
 void sigint_handler(int signum){
-    printf("CTRL+C to kill me...\n");
     if(child == 0)kill(getppid(), SIGINT);
     else {
         kill(child, SIGINT);
@@ -117,9 +131,9 @@ int send_msg(enum RqsType type){
 
 int rcv_msg(){
     if(-1 == msgrcv(queue_id, &msg_buff, sizeof(Msg)-sizeof(long), 0, 0))return -1;
-    printf("%s\n", msg_buff.text); 
+    printf(">%s\n", msg_buff.text); 
     if(msg_buff.rqs_type == STOP){
-        printf("Server died!\nShutting down client\n");
+        if(msg_buff.other_id != -1)printf("Server died!\n");
         exit(0);
     }   
     return 0;
@@ -127,11 +141,14 @@ int rcv_msg(){
 
 void init(){
     key_t key = ftok(getenv("HOME"), getpid());
+    if(key == -1)printf("%s ftok client\n", strerror(errno));
     queue_id = msgget(key, IPC_CREAT | IPC_EXCL | PERMISSIONS);
-    if(-1 == queue_id)printf("%s 1\n", strerror(errno));
+    if(-1 == queue_id){
+        printf("%s\nCould not open queue\n", strerror(errno));
+        exit(1);
+    }
     msg_buff.sender_id = queue_id;
-    printf("server_id: %d\n", server_id);
-    if(-1 == send_msg(INIT))printf("%s 1\n", strerror(errno));
+    if(-1 == send_msg(INIT))printf("%s snd init fail\n", strerror(errno));
     rcv_msg();
     client_id = msg_buff.other_id;
     msg_buff.sender_id = client_id;
@@ -149,43 +166,66 @@ void list(){
 }
 
 void friends(){
-    strcpy(msg_buff.text, "");
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
     if(-1 == send_msg(FRIENDS))printf("%s 1\n", strerror(errno));
 }
 
 void add_friend(){
-    strcpy(msg_buff.text, "");
-    if( 0 == scanf("%d", &msg_buff.other_id)){
-        printf("Too few arguments / not good argument\n");
-        return;
-    }
+    // if( 0 == scanf("%d", &msg_buff.other_id)){
+    //     printf("Too few arguments / not good argument\n");
+    //     return;
+    // }
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
     if(-1 == send_msg(ADD))printf("%s 1\n", strerror(errno));
 }
 
 void delete_friend(){
-    strcpy(msg_buff.text, "");
-    if( 0 == scanf("%d", &msg_buff.other_id)){
-        printf("Too few arguments / not good argument\n");
-        return;
-    }
+
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
     if(-1 == send_msg(DEL))printf("%s 1\n", strerror(errno));
 }
 
 void to_all(){
-    while(0==scanf("\"%s\"", msg_buff.text) && 0==scanf("%s", msg_buff.text))printf("No message given");
-    
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
     if(-1 == send_msg(TOALL))printf("%s 1\n", strerror(errno));
 }
 
 void to_friends(){
-    scanf("\"%s\"", msg_buff.text);
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
     if(-1 == send_msg(TOFRIENDS))printf("%s 1\n", strerror(errno));
 }
 
 void to_one(){
-    if(2 > scanf("%d \"%s\"", &msg_buff.other_id, msg_buff.text)){
-        printf("Wrong arguments for 2ONE command\n");
+    if(0 == scanf("%d", &msg_buff.other_id)){
+        printf("Wrong ID argument\n");
         return;
-    };
+    }
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
+    
     if(-1 == send_msg(TOONE))printf("%s 1\n", strerror(errno));
+}
+
+void echo(){    
+    fgets(msg_buff.text, MAX_MSG_LENGTH, stream);
+    if ((strlen(msg_buff.text) > 0) && (msg_buff.text[strlen (msg_buff.text) - 1] == '\n'))
+        msg_buff.text[strlen (msg_buff.text) - 1] = '\0';
+    if(-1 == send_msg(ECHO))printf("%s 1\n", strerror(errno));
 }

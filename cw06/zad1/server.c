@@ -29,6 +29,7 @@ void delete_friend();
 void to_all();
 void to_friends();
 void to_one();
+void echo();
 
 void sigint_handler(int);
 
@@ -45,7 +46,11 @@ int main(int argc, char **argv){
     signal(SIGINT, sigint_handler);
     key_t key = ftok(getenv("HOME"), SERVER_SEED);
     queue_id = msgget(key, IPC_CREAT |PERMISSIONS);
-    if(-1 == queue_id)printf("%s 4\n", strerror(errno));;
+    if(-1 == queue_id){
+        printf("%s 4\n", strerror(errno));
+        exit(1);
+    }
+    printf("Server qid: %d\n", queue_id);
     clients_friends = calloc(MAX_CLIENTS, sizeof(int*));
     for(int i=0; i<MAX_CLIENTS; i++){
         clients_friends[i] = calloc(MAX_CLIENTS+1, sizeof(int));
@@ -82,8 +87,10 @@ int main(int argc, char **argv){
                 case TOONE:
                     to_one();
                     break;
+                case ECHO:
+                    echo();
+                    break;
                 default:
-                    printf("Not known type!");
                     break;
             }
             msg_buffer.type = -1;
@@ -111,7 +118,7 @@ void sigint_handler(int signum){
 
 void add_sender_stamp(char *str){
     char buffer[26];
-    sprintf(buffer, "\n--Sender ID: %d", clients_friends[msg_buffer.sender_id][0]);
+    sprintf(buffer, "\n--Sender ID: %d", msg_buffer.sender_id);
     strcat(str, buffer);
 }
 
@@ -125,20 +132,28 @@ void add_date_stamp(char* str){
 }
 
 void add_client(){
-    int client_key = msg_buffer.sender_id; // in init sender_id contains client queue key
+    
     int add_id = 0;
-    for(; add_id<MAX_CLIENTS && clients_friends[add_id][0]!=-1; add_id++); // find spot for client
+    for(; add_id<MAX_CLIENTS && clients_friends[add_id][0]!=-1; add_id++){
+    
+    }; // find spot for client
+    
     if(add_id >= MAX_CLIENTS){
         msg_buffer.other_id = -1;
         strcpy(msg_buffer.text,"Server too busy! Come back later");
         add_date_stamp(msg_buffer.text);
-        msgsnd(client_key, &msg_buffer, sizeof(Msg)-sizeof(long),0);
+        msg_buffer.type = 3;
+        msg_buffer.rqs_type = STOP;
+        msgsnd(msg_buffer.sender_id, &msg_buffer, sizeof(Msg)-sizeof(long),0);
         return;
     } //brak miejsca na serwerze
-    clients_friends[add_id][0] = client_key; // first filed in i-th row in array contains key for i-th client
-    for(int i=1; i<=MAX_CLIENTS; i++)clients_friends[add_id][i] = -1;//rest set at -1 as not friend
     
+    clients_friends[add_id][0] = msg_buffer.sender_id; // first filed in i-th row in array contains key for i-th client
+    for(int i=1; i<=MAX_CLIENTS; i++)clients_friends[add_id][i] = -1;//rest set at -1 as not friend
+    printf("Start adding on %d with qid %d\n", add_id, clients_friends[add_id][0]);
     msg_buffer.other_id = add_id;
+    strcpy(msg_buffer.text, "Added successfully");
+    msg_buffer.sender_id = add_id;
     add_date_stamp(msg_buffer.text);
     //msgsnd(client_key, &msg_buffer, sizeof(Msg)-sizeof(long),0);
     send_msg();
@@ -148,8 +163,8 @@ void add_client(){
 void stop_client(){
     if(msg_buffer.sender_id < 0 || msg_buffer.sender_id >= MAX_CLIENTS || 
         clients_friends[msg_buffer.sender_id][0] == -1)return;
-    for(int i=1; i<= MAX_CLIENTS; i++){
-        clients_friends[i][msg_buffer.sender_id] = -1;
+    for(int i=0; i< MAX_CLIENTS; i++){
+        clients_friends[i][msg_buffer.sender_id + 1] = -1;
     }
     clients_friends[msg_buffer.sender_id][0] = -1;
 }
@@ -170,41 +185,62 @@ void list(){
 }
 
 void friends(){
-    int client_id = msg_buffer.sender_id;
-    char one_id[14]; //holding single id's of clients
-    strcat(msg_buffer.text,"Your friends:");
-    for(int i=1; i<=MAX_CLIENTS; i++){ // MAX_CLIENTS + 1 is the length of row
-        if(clients_friends[client_id][i] == -1)continue; // is not friend
-        sprintf(one_id, "- %d", i-1); 
-        strcat(msg_buffer.text, "\n");
-        strcat(msg_buffer.text, one_id);
+    for(int i=1; i<MAX_CLIENTS; i++)clients_friends[msg_buffer.sender_id][i] = -1;
+    long int x;
+    char *pEnd;
+    x = strtol(msg_buffer.text, &pEnd, 10);
+    if(x >= 0 && x < MAX_CLIENTS){
+        clients_friends[msg_buffer.sender_id][x+1] = 
+            clients_friends[x][0];
     }
+    while((x = strtol(pEnd, &pEnd, 10)) != 0L){
+        if(x >= 0 && x < MAX_CLIENTS){
+        clients_friends[msg_buffer.sender_id][x+1] = 
+            clients_friends[x][0];
+        }
+    }
+    strcpy(msg_buffer.text, "Friends list set");
     add_date_stamp(msg_buffer.text);
     msg_buffer.other_id = msg_buffer.sender_id;
     send_msg();
 }
 
 void add_friend(){
-    if(msg_buffer.other_id >= 0 && msg_buffer.other_id < MAX_CLIENTS && 
-        clients_friends[msg_buffer.other_id][0] != -1){
-        clients_friends[msg_buffer.sender_id][msg_buffer.other_id+1] = 
-            clients_friends[msg_buffer.other_id][0];
-        strcat(msg_buffer.text, "Friend added!");
-    }else{
-        strcat(msg_buffer.text, "Client not active or wrong ID!");
+    long int x;
+    char *pEnd;
+    x = strtol(msg_buffer.text, &pEnd, 10);
+    if(x >= 0 && x < MAX_CLIENTS){
+        clients_friends[msg_buffer.sender_id][x+1] = 
+            clients_friends[x][0];
     }
+    while((x = strtol(pEnd, &pEnd, 10)) != 0L){
+        if(x >= 0 && x < MAX_CLIENTS){
+        clients_friends[msg_buffer.sender_id][x+1] = 
+            clients_friends[x][0];
+        }
+    }
+    strcpy(msg_buffer.text, "Friends list edited");
+    add_date_stamp(msg_buffer.text);
     msg_buffer.other_id = msg_buffer.sender_id;
     send_msg(); //send confirmation
 }
 
 void delete_friend(){
-    if(msg_buffer.other_id >= 0 && msg_buffer.other_id < MAX_CLIENTS && 
-        clients_friends[msg_buffer.other_id][0] != -1){
-        clients_friends[msg_buffer.sender_id][msg_buffer.other_id+1] = -1;
-        strcat(msg_buffer.text, "Friend deleted :(");
-    }else{
-        strcat(msg_buffer.text, "Client not active or wrong ID!");
+    long int x;
+    char *pEnd;
+    x = strtol(msg_buffer.text, &pEnd, 10);
+    if(x >= 0 && x < MAX_CLIENTS && 
+        clients_friends[x][0] != -1){
+        clients_friends[msg_buffer.sender_id][x+1] = -1;
     }
+    while((x = strtol(pEnd, &pEnd, 10)) != 0L){
+        if(x >= 0 && x < MAX_CLIENTS && 
+            clients_friends[x][0] != -1){
+            clients_friends[msg_buffer.sender_id][x+1] = -1;
+        }
+    }
+    strcpy(msg_buffer.text, "Friends list edited");
+    add_date_stamp(msg_buffer.text);
     msg_buffer.other_id = msg_buffer.sender_id;
     send_msg();
 }
@@ -234,6 +270,12 @@ void to_friends(){
 void to_one(){
     add_sender_stamp(msg_buffer.text);
     add_date_stamp(msg_buffer.text);
+    send_msg();
+}
+
+void echo(){
+    add_date_stamp(msg_buffer.text);
+    msg_buffer.other_id = msg_buffer.sender_id;
     send_msg();
 }
 
