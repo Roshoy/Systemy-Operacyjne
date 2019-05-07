@@ -5,22 +5,23 @@
 #define SERVER_SEED 3
 #define PERMISSIONS 0666
 #define MAX_CLIENTS 10
+#define MAX_QUEUE_SIZE 10
 
 enum RqsType{
-    STOP = 1,
+    STOP = 3,
     LIST = 2,
     FRIENDS = 6,
-    INIT = 3,
-    ADD = 7,
-    DEL = 11,
-    TOALL = 15,
-    TOFRIENDS = 19,
-    TOONE = 23,
-    ECHO = 27
+    INIT = 1,
+    ADD = 5,
+    DEL = 9,
+    TOALL = 13,
+    TOFRIENDS = 17,
+    TOONE = 21,
+    ECHO = 25
 }RqsType;
 
 struct Msg{
-    long type;
+    int type;
     enum RqsType rqs_type;
     char text[MAX_MSG_LENGTH];
     int sender_id;

@@ -9,13 +9,15 @@
 #include <errno.h>
 #include <signal.h>
 #include <ctype.h>
+#include <mqueue.h>
 #include "chat.h"
 
 FILE *stream;
 int child;
-int server_id;
-int queue_id;
+mqd_t server_id;
+mqd_t queue_id;
 int client_id;
+char key[13];
 struct Msg msg_buff;
 void init();
 void stop();
@@ -44,12 +46,14 @@ int main(int argc, char **argv){
     sigfillset(&cl_sig_mask);
     sigdelset(&cl_sig_mask, SIGINT);
     signal(SIGINT, sigint_handler);
-    key_t server_key = ftok(getenv("HOME"), SERVER_SEED);
-    if(server_key == -1){
-        printf("%s ftok server\n", strerror(errno));
-        exit(1);
-    }
-    server_id = msgget(server_key, PERMISSIONS);
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = MAX_QUEUE_SIZE;
+    attr.mq_msgsize = sizeof(Msg);
+    attr.mq_curmsgs = 0;
+    char server_key[13];
+    sprintf(server_key, "/%d", SERVER_SEED);
+    server_id = mq_open(server_key, O_WRONLY,PERMISSIONS, &attr);
     if(-1 == server_id){
         printf("%s get server qid\n", strerror(errno));
         exit(1);
@@ -108,18 +112,25 @@ void parse_input(){
 }
 
 void bye_function(){
-    if(child == 0){
-        msgctl(queue_id, IPC_RMID, NULL);
-        kill(getppid(), SIGINT);
-    }else{
+    if(child == 0)mq_close(queue_id);
+    kill(child, SIGINT);
+    if(child != 0){
         kill(child, SIGINT);
+       
+        wait(NULL);
+    }else{
+        kill(getppid(), SIGINT);
     }
     if(child == 0 && msg_buff.rqs_type != STOP){
         msg_buff.sender_id = client_id;
         send_msg(STOP);
     }
     if(stream != stdin)fclose(stream);
-    if(child != 0)printf("Shutting down client\n");
+    if(child != 0){
+        printf("Shutting down client\n");
+        mq_close(queue_id);
+        mq_unlink(key);
+    }
 }
 
 void sigint_handler(int signum){
@@ -135,11 +146,11 @@ void sigint_handler(int signum){
 int send_msg(enum RqsType type){
     msg_buff.type = type % 4;
     msg_buff.rqs_type = type;
-    return msgsnd(server_id, &msg_buff, sizeof(Msg)-sizeof(long),0);
+    return mq_send(server_id, (char*)&msg_buff, sizeof(Msg), msg_buff.type);
 }
 
 int rcv_msg(){
-    if(-1 == msgrcv(queue_id, &msg_buff, sizeof(Msg)-sizeof(long), 0, 0))return -1;
+    if(-1 == mq_receive(queue_id, (char*)&msg_buff, sizeof(Msg), NULL))return -1;
     printf(">%s\n", msg_buff.text); 
     if(msg_buff.rqs_type == STOP){
         exit(0);
@@ -149,20 +160,23 @@ int rcv_msg(){
 
 void init(){
     queue_id = -1;
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = MAX_QUEUE_SIZE;
+    attr.mq_msgsize = sizeof(Msg);
+    attr.mq_curmsgs = 0;
     while(-1 == queue_id){
-        key_t key = ftok(getenv("HOME"), getpid());
-        if(key == -1)printf("%s ftok client\n", strerror(errno));
-        queue_id = msgget(key, IPC_CREAT | PERMISSIONS);
-    
+        sprintf(key, "/%d", getpid());
+        queue_id = mq_open(key, O_RDWR | O_CREAT ,PERMISSIONS, &attr);
         if(-1 == queue_id)printf("%s\nCould not open queue\n", strerror(errno));
         //exit(1);
     }
     msg_buff.sender_id = queue_id;
+    strcpy(msg_buff.text, key);
     if(-1 == send_msg(INIT))printf("%s snd init fail\n", strerror(errno));
     rcv_msg();
     client_id = msg_buff.other_id;
-    msg_buff.sender_id = client_id;
-       
+    msg_buff.sender_id = client_id;       
 }
 
 void stop(){

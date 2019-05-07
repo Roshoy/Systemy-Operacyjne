@@ -8,11 +8,13 @@
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
+#include <mqueue.h>
 #include "chat.h"
 
-int **clients_friends;
+mqd_t **clients_friends;
 struct Msg msg_buffer;
-int queue_id;
+mqd_t queue_id;
+char key[13];
 void rise_errno();
 void rise_error(char *);
 void exit_handler();
@@ -31,11 +33,7 @@ void echo();
 
 void sigint_handler(int);
 
-int send_msg(){
-    //printf(">%s\n",msg_buffer.text);
-    return msgsnd(clients_friends[msg_buffer.other_id-1][0],
-                  &msg_buffer, sizeof(Msg)-sizeof(long),0);
-}
+int send_msg();
 
 int main(int argc, char **argv){   
     atexit(exit_handler);
@@ -43,13 +41,19 @@ int main(int argc, char **argv){
     sigfillset(&cl_sig_mask);
     sigdelset(&cl_sig_mask, SIGINT);
     signal(SIGINT, sigint_handler);
-    key_t key = ftok(getenv("HOME"), SERVER_SEED);
-    queue_id = msgget(key, IPC_CREAT |PERMISSIONS);
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = MAX_QUEUE_SIZE;
+    attr.mq_msgsize = sizeof(Msg);
+    attr.mq_curmsgs = 0;
+    sprintf(key, "/%d", SERVER_SEED);
+    queue_id = mq_open(key, O_RDWR | O_CREAT ,PERMISSIONS, &attr);
     if(-1 == queue_id){
         printf("%s 4\n", strerror(errno));
         exit(1);
     }
     printf("Server qid: %d\n", queue_id);
+    mq_getattr(queue_id, &attr);
     clients_friends = calloc(MAX_CLIENTS, sizeof(int*));
     for(int i=0; i<MAX_CLIENTS; i++){
         clients_friends[i] = calloc(MAX_CLIENTS+1, sizeof(int));
@@ -58,8 +62,7 @@ int main(int argc, char **argv){
     msg_buffer.type = -1;
     while(1){
         sleep(1);
-        msgrcv(queue_id, &msg_buffer, sizeof(Msg) - sizeof(long), -100, IPC_NOWAIT);
-        
+        mq_receive(queue_id, (char*)&msg_buffer, sizeof(Msg), NULL);
         if(msg_buffer.type != -1){
             if(msg_buffer.rqs_type == INIT || clients_friends[msg_buffer.sender_id-1][0] != -1){
                 switch(msg_buffer.rqs_type){
@@ -105,19 +108,30 @@ int main(int argc, char **argv){
 }
 
 void exit_handler(){
+    strcpy(msg_buffer.text, "Server is closed");
     for(int i=0; i<MAX_CLIENTS; i++){
         if(clients_friends[i][0] != -1){
             msg_buffer.rqs_type = STOP;
-            msg_buffer.type = 3;
-            msgsnd(clients_friends[i][0], &msg_buffer, sizeof(Msg)-sizeof(long),0);
+            msg_buffer.type = 1;
+            mq_send(clients_friends[i][0], (char*)&msg_buffer, sizeof(Msg),msg_buffer.type);
         }
     }
-    msgctl(queue_id, IPC_RMID, NULL);
+    mq_close(queue_id);
+    sleep(2);
+    mq_unlink(key);
+    for(int i=0; i<MAX_CLIENTS; i++)free(clients_friends[i]);
+    free(clients_friends);
 }
 
 void sigint_handler(int signum){
     printf("CTRL+C to kill me...\n");
     exit(0);
+}
+
+int send_msg(){
+    //printf(">%s\n",msg_buffer.text);
+    return mq_send(clients_friends[msg_buffer.other_id-1][0],
+                  (char*)&msg_buffer, sizeof(Msg), msg_buffer.type);
 }
 
 void add_sender_stamp(char *str){
@@ -138,40 +152,49 @@ void add_date_stamp(char* str){
 void add_client(){
     
     int add_id = 1;
-    for(; add_id-1<MAX_CLIENTS && clients_friends[add_id-1][0]!=-1; add_id++){
-    
-    }; // find spot for client
-    
+    for(; add_id-1<MAX_CLIENTS && clients_friends[add_id-1][0]!=-1; add_id++); // find spot for client
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = MAX_QUEUE_SIZE;
+    attr.mq_msgsize = sizeof(Msg);
+    attr.mq_curmsgs = 0;
     if(add_id > MAX_CLIENTS){
         msg_buffer.other_id = -1;
         strcpy(msg_buffer.text,"Server too busy! Come back later");
         add_date_stamp(msg_buffer.text);
-        msg_buffer.type = 3;
+        msg_buffer.type = 1;
         msg_buffer.rqs_type = STOP;
-        msgsnd(msg_buffer.sender_id, &msg_buffer, sizeof(Msg)-sizeof(long),0);
+        
+        mqd_t temp = mq_open(msg_buffer.text, O_WRONLY, PERMISSIONS, &attr);
+        mq_send(temp, (char*)&msg_buffer, sizeof(Msg),msg_buffer.type);
+        mq_close(temp);
         return;
     } //brak miejsca na serwerze
-    
-    clients_friends[add_id-1][0] = msg_buffer.sender_id; // first filed in i-th row in array contains key for i-th client
+    while(clients_friends[add_id-1][0] == -1){
+        clients_friends[add_id-1][0] = mq_open(msg_buffer.text, O_RDWR, PERMISSIONS, &attr); // first filed in i-th row in array contains key for i-th client
+        if(clients_friends[add_id-1][0] == -1)printf("Not added client: %s\n", strerror(errno));
+    }
     for(int i=1; i<=MAX_CLIENTS; i++)clients_friends[add_id-1][i] = -1;//rest set at -1 as not friend
     msg_buffer.other_id = add_id;
     strcpy(msg_buffer.text, "Added successfully");
     msg_buffer.sender_id = add_id;
     add_date_stamp(msg_buffer.text);
-    //msgsnd(client_key, &msg_buffer, sizeof(Msg)-sizeof(long),0);
     send_msg();
     //send new id
 }
 
 void stop_client(){
-    strcpy(msg_buffer.text, "");
-    msg_buffer.other_id = msg_buffer.sender_id;
-    send_msg();
+    
     if(msg_buffer.sender_id < 1 || msg_buffer.sender_id > MAX_CLIENTS || 
         clients_friends[msg_buffer.sender_id-1][0] == -1)return;
     for(int i=0; i< MAX_CLIENTS; i++){
         clients_friends[i][msg_buffer.sender_id] = -1;
     }
+    strcpy(msg_buffer.text, "");
+    msg_buffer.other_id = msg_buffer.sender_id;
+
+    send_msg();
+    mq_close(clients_friends[msg_buffer.sender_id-1][0]);
     clients_friends[msg_buffer.sender_id-1][0] = -1;
 }
 
@@ -180,7 +203,7 @@ void list(){
     strcat(msg_buffer.text,"Active clients:");
     for(int i=0; i<MAX_CLIENTS; i++){
         if(clients_friends[i][0] == -1)continue; // is not active
-        sprintf(one_id, "- %d", i+1); // int to string of active client
+        sprintf(one_id, "- %d", i); // int to string of active client
         strcat(msg_buffer.text, "\n");
         strcat(msg_buffer.text, one_id);
     }

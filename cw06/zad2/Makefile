@@ -7,14 +7,14 @@ all: server.c client.c chat.h
 	make clear
 
 main: main.c
-	gcc -c $(CFLAGS) main.c -g -o main.o
-	gcc main.o -g $(CFLAGS) -L ./ -o main
+	gcc -c $(CFLAGS) main.c -g -o main.o 
+	gcc main.o -g $(CFLAGS) -L ./ -o main -lrt
 
 server: server.c
-	$(CC) server.c -o server
+	$(CC) server.c -o server -lrt
 	
 client: client.c
-	$(CC) client.c -o client
+	$(CC) client.c -o client -lrt
 
 test:
 	./client client1 &

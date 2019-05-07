@@ -1,7 +1,8 @@
 echo do siebie
-friends 1
+list
 2all do wszystkich
 2friends do kolegow
 2one 1 hej jol
 echo bruhh
 list
+stop
