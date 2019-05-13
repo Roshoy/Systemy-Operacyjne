@@ -11,6 +11,13 @@
 #include <sys/time.h>
 #include <signal.h>
 
+#define SEM_WGHT "/semwght"
+#define SEM_COUNT "/semcount"
+#define SEM_GLOBAL "/semglobal"
+#define SEM_LOADER "/semloader"
+#define SEM_SHUTDOWN "/semshutdown"
+#define SHM_PATH "/shmpath"
+
 #define SEM_SEED 1
 #define SHM_SEED 2
 #define PERMISIONS 0666

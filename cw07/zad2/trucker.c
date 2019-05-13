@@ -9,15 +9,25 @@
 #include <time.h>
 #include <unistd.h>
 #include <signal.h>
+#include <semaphore.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "line.h"
 
 int BELT_CAP = 10;
 int BELT_WGHT_LMT = 100;
 int TRUCK_LMT = 200;
 
-int truck_wgth;
-int sem_id;
+sem_t *sem_wght;
+sem_t *sem_count;
+sem_t *sem_global;
+sem_t *sem_loader;
+sem_t *sem_shutdown;
 int shm_id;
+
+int truck_wgth;
+
 Queue *queue_ptr;
 void init();
 void exit_fun();
@@ -32,11 +42,15 @@ int main(int argc, char **argv){
         printf("Not enough arguments\n");
         exit(1);
     }
+    BELT_CAP = atoi(argv[3]);
     TRUCK_LMT = atoi(argv[1]);
     BELT_WGHT_LMT = atoi(argv[2]);
-    BELT_CAP = atoi(argv[3]);
+    
+
     atexit(exit_fun);
+
     signal(SIGINT, sigint_h);
+
     init();
     while(1){
         sleep(3);
@@ -47,44 +61,24 @@ int main(int argc, char **argv){
 }
 
 void init(){
-    key_t sem_key = ftok(getenv("HOME"), SEM_SEED);
-
-    printf("FTOK: %d\n", sem_key);
-    key_t shm_key = ftok(getenv("HOME"), SHM_SEED);
-    printf("FTOK: %d\n", shm_key);
-    sem_id = semget(sem_key, 4, IPC_CREAT | PERMISIONS);
-    if(sem_id == -1){
+    sem_wght = sem_open(SEM_WGHT, O_CREAT, PERMISIONS, BELT_WGHT_LMT);
+    sem_count = sem_open(SEM_COUNT, O_CREAT, PERMISIONS, BELT_CAP);
+    sem_global = sem_open(SEM_GLOBAL, O_CREAT, PERMISIONS, 1);
+    sem_loader = sem_open(SEM_LOADER, O_CREAT, PERMISIONS, 1);
+    sem_shutdown = sem_open(SEM_SHUTDOWN, O_CREAT, PERMISIONS, 1);
+    if(!sem_wght || !sem_count || !sem_global || !sem_loader || !sem_shutdown){
         printf("Semaphore not created %s", strerror(errno));
         exit(1);
     }
-    shm_id = shmget(shm_key, sizeof(Queue), IPC_CREAT | PERMISIONS );
-    if(shm_id == -1){
-        printf("Shared memory not created %s", strerror(errno));
-        pause();
+
+    shm_id = shm_open(SHM_PATH, O_RDWR | O_CREAT | O_TRUNC, PERMISIONS);
+    if(ftruncate(shm_id, sizeof(Queue)) == -1){
+        printf("Can't truncate shared memory: %s", strerror(errno));
         exit(1);
     }
-    printf("Starting values: %d %d\n", BELT_WGHT_LMT, BELT_CAP);
-    int value = BELT_WGHT_LMT;
-    if(-1 == semctl(sem_id, 0, SETVAL, BELT_WGHT_LMT)){
-        printf("Sem 0 init failed: %s\n", strerror(errno));
-    };
-    value = BELT_CAP;
-    if(-1 == semctl(sem_id, 1, SETVAL, BELT_CAP)){
-        printf("Sem 1 init failed: %s\n", strerror(errno));
-    };
-    value = 1;
-    if(-1 == semctl(sem_id, 2, SETVAL, 1)){
-        printf("Sem 2 init failed: %s\n", strerror(errno));
-    };
-    if(-1 == semctl(sem_id, 3, SETVAL, 1)){
-        printf("Sem 3 init failed: %s\n", strerror(errno));
-    };
-    //////debugging
-    int waiting;
-    printf("Belt wgth: %d\n Cpacity: %d\n", semctl(sem_id, 0, GETVAL), semctl(sem_id, 1, GETVAL));
-    //////debugging
-
-    if((queue_ptr = (Queue *)shmat(shm_id, NULL, 0)) == (void *)-1){
+    queue_ptr = mmap(NULL, sizeof(Queue), PROT_READ | PROT_WRITE | PROT_EXEC, 
+                     MAP_SHARED, shm_id, 0);
+    if(queue_ptr == (void *)-1){
         printf("Shared memory not recived %s", strerror(errno));
         exit(1);
     }
@@ -95,17 +89,12 @@ void init(){
 
 void get_line_perm(){
     int waiting = 0;
-    struct sembuf buff[1];
-    buff[0].sem_num = 2;
-    buff[0].sem_op = -1;
-    buff[0].sem_flg = IPC_NOWAIT;
 
     int value;
-   // printf("Belt wgth: %d\n Cpacity: %d\n", semctl(sem_id, 2, GETVAL, value), semctl(sem_id, 1, GETVAL, value));
-    while(semctl(sem_id, 1, GETVAL, value) == BELT_CAP || -1 == semop(sem_id, buff, 1)){
+    sem_getvalue(sem_wght, &value);
+    while(value == BELT_CAP || -1 == sem_trywait(sem_global)){
         if(waiting == 0){
-            waiting = 1;
-            
+            waiting = 1;            
             printf("Waiting for loading sem 3\n");
             print_stamp();
         }
@@ -113,18 +102,16 @@ void get_line_perm(){
     printf("<<<<<<<<<Opend SEM\n");
     waiting = 0;
     load_truck();
-    
-    buff[0].sem_num = 2;
-    buff[0].sem_op = 1;
-    semop(sem_id, buff, 1);
+    sem_post(sem_global);
+    // if(semctl(sem_id, 0, GETVAL) == -1)exit(1);
+
+    // if(semctl(sem_id, 1, GETVAL) == -1)exit(1);
     //printf("Belt wgth: %d\n Cpacity: %d\n", val, waiting);
     printf("<<<<<<<<<Closed SEM\n");
 }
 
 void load_truck(){
     if(queue_ptr->size > 0){
-        
-        struct sembuf buff[2];
         QueueNode *pckg = queue_ptr->items+queue_ptr->head;
         if(pckg->weight + truck_wgth > TRUCK_LMT){            
             unload_truck();
@@ -134,17 +121,8 @@ void load_truck(){
         
         //printf("Pckg wght: %d\n",pckg->weight);
         truck_wgth += pckg->weight;
-        buff[0].sem_num = 0;
-        buff[0].sem_op = pckg->weight;
-        buff[0].sem_flg = 0;
-        buff[1].sem_num = 1;
-        buff[1].sem_op = 1;
-        buff[1].sem_flg = 0;
-        //printf("HEHE\n");
-        int value;
-        //printf("Belt wgth: %d\n Cpacity: %d\n", semctl(sem_id, 0, GETVAL), semctl(sem_id, 1, GETVAL));
-        semop(sem_id, buff, 2);
-        //printf("HEHE\n");
+        for(int i=0; i<pckg->weight; i++)sem_post(sem_wght);
+        sem_post(sem_count);
         time_t end_time;
         time(&end_time);
         double time_diff = difftime(end_time, pckg->start_time);
@@ -173,21 +151,31 @@ void print_stamp(){
 
 void exit_fun(){    
     printf("Hej pa pa \n");
-    if(sem_id > 0)semctl(sem_id, 0, IPC_RMID);
+    sem_close(sem_wght);
+    sem_close(sem_count);
+    sem_close(sem_global);
+    sem_close(sem_loader);
+    sem_close(sem_shutdown);
+    sem_unlink(SEM_WGHT);
+    sem_unlink(SEM_COUNT);
+    sem_unlink(SEM_GLOBAL);
+    sem_unlink(SEM_LOADER);
+    sem_unlink(SEM_SHUTDOWN);
+    
+    
+    
     if(queue_ptr != NULL && queue_ptr != (void *)-1){
-        shmdt(queue_ptr);
+        munmap(queue_ptr, sizeof(Queue));
     }
-    if(shm_id > 0)shmctl(shm_id, IPC_RMID, NULL);
+    if(shm_id > 0)shm_unlink(SHM_PATH);
 }
 
 void sigint_h(int signum){
+   // exit(0);
+    sem_wait(sem_shutdown);
     //exit(0);
     int waiting = 0;
-    struct sembuf buff[2];
-    buff[0].sem_num = 2;
-    buff[0].sem_op = -1;
-    buff[0].sem_flg = IPC_NOWAIT;
-    while(-1 == semop(sem_id, buff,1)){
+    while(-1 == sem_trywait(sem_global)){
         if(waiting == 0){
             waiting = 1;
             printf("Waiting for loading\n");

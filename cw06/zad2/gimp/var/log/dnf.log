@@ -1,0 +1,4 @@
+2019-05-07T22:26:40Z INFO --- logging initialized ---
+2019-05-07T22:26:40Z DDEBUG timer: config: 2 ms
+2019-05-07T22:26:40Z DEBUG Wczytane wtyczki: builddep, changelog, config-manager, copr, debug, debuginfo-install, download, generate_completion_cache, needs-restarting, playground, repoclosure, repodiff, repograph, repomanage, reposync
+2019-05-07T22:26:40Z DDEBUG Cleaning up.
