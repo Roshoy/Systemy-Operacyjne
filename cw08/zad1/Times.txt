@@ -1,0 +1,170 @@
+Image size: 640x480
+Type: BLOCK
+Filter size: 10
+Threads:  1 | SUM TIME :   0.557318 s
+Thread  0:   0.556572 s
+Threads:  2 | SUM TIME :   0.284536 s
+Thread  0:   0.283879 s
+Thread  1:   0.284451 s
+Threads:  4 | SUM TIME :   0.162346 s
+Thread  0:   0.146783 s
+Thread  1:   0.162190 s
+Thread  2:   0.150697 s
+Thread  3:   0.156855 s
+Threads:  8 | SUM TIME :   0.163332 s
+Thread  0:   0.139931 s
+Thread  1:   0.106335 s
+Thread  2:   0.147655 s
+Thread  3:   0.153451 s
+Thread  4:   0.146328 s
+Thread  5:   0.137987 s
+Thread  6:   0.131415 s
+Thread  7:   0.127734 s
+
+Filter size: 20
+Threads:  1 | SUM TIME :   2.214327 s
+Thread  0:   2.214113 s
+Threads:  2 | SUM TIME :   1.134317 s
+Thread  0:   1.134244 s
+Thread  1:   1.130179 s
+Threads:  4 | SUM TIME :   0.652804 s
+Thread  0:   0.629882 s
+Thread  1:   0.652564 s
+Thread  2:   0.627133 s
+Thread  3:   0.624369 s
+Threads:  8 | SUM TIME :   0.699616 s
+Thread  0:   0.692861 s
+Thread  1:   0.672966 s
+Thread  2:   0.580900 s
+Thread  3:   0.668474 s
+Thread  4:   0.676788 s
+Thread  5:   0.599281 s
+Thread  6:   0.584373 s
+Thread  7:   0.569949 s
+
+Filter size: 40
+Threads:  1 | SUM TIME :   8.977267 s
+Thread  0:   8.977060 s
+Threads:  2 | SUM TIME :   4.505206 s
+Thread  0:   4.505132 s
+Thread  1:   4.503994 s
+Threads:  4 | SUM TIME :   2.419279 s
+Thread  0:   2.346534 s
+Thread  1:   2.419164 s
+Thread  2:   2.389210 s
+Thread  3:   2.376362 s
+Threads:  8 | SUM TIME :   2.415693 s
+Thread  0:   2.391528 s
+Thread  1:   2.415593 s
+Thread  2:   2.342237 s
+Thread  3:   2.367466 s
+Thread  4:   2.330959 s
+Thread  5:   2.389561 s
+Thread  6:   2.394950 s
+Thread  7:   2.362781 s
+
+Filter size: 80
+Threads:  1 | SUM TIME :  36.307631 s
+Thread  0:  36.307422 s
+Threads:  2 | SUM TIME :  17.990436 s
+Thread  0:  17.990366 s
+Thread  1:  17.968969 s
+Threads:  4 | SUM TIME :  10.350731 s
+Thread  0:   9.931216 s
+Thread  1:   9.918170 s
+Thread  2:  10.040415 s
+Thread  3:  10.350585 s
+Threads:  8 | SUM TIME :  10.058265 s
+Thread  0:   9.876217 s
+Thread  1:   9.943203 s
+Thread  2:   9.935171 s
+Thread  3:   9.937529 s
+Thread  4:   9.928109 s
+Thread  5:   9.907790 s
+Thread  6:   9.877824 s
+Thread  7:  10.045772 s
+
+Type: INTERLEAVE
+Filter size: 10
+Threads:  1 | SUM TIME :   0.576354 s
+Thread  0:   0.576144 s
+Threads:  2 | SUM TIME :   0.289380 s
+Thread  0:   0.287710 s
+Thread  1:   0.289287 s
+Threads:  4 | SUM TIME :   0.186504 s
+Thread  0:   0.154588 s
+Thread  1:   0.167465 s
+Thread  2:   0.168413 s
+Thread  3:   0.185155 s
+Threads:  8 | SUM TIME :   0.167894 s
+Thread  0:   0.138519 s
+Thread  1:   0.106897 s
+Thread  2:   0.166563 s
+Thread  3:   0.154855 s
+Thread  4:   0.154885 s
+Thread  5:   0.143347 s
+Thread  6:   0.134520 s
+Thread  7:   0.138453 s
+
+Filter size: 20
+Threads:  1 | SUM TIME :   2.292728 s
+Thread  0:   2.292416 s
+Threads:  2 | SUM TIME :   1.154220 s
+Thread  0:   1.154146 s
+Thread  1:   1.150556 s
+Threads:  4 | SUM TIME :   0.644214 s
+Thread  0:   0.624274 s
+Thread  1:   0.644123 s
+Thread  2:   0.634681 s
+Thread  3:   0.612670 s
+Threads:  8 | SUM TIME :   0.684071 s
+Thread  0:   0.474796 s
+Thread  1:   0.668537 s
+Thread  2:   0.618676 s
+Thread  3:   0.672503 s
+Thread  4:   0.664003 s
+Thread  5:   0.642812 s
+Thread  6:   0.643016 s
+Thread  7:   0.660159 s
+
+Filter size: 40
+Threads:  1 | SUM TIME :   9.146330 s
+Thread  0:   9.146096 s
+Threads:  2 | SUM TIME :   4.625235 s
+Thread  0:   4.595671 s
+Thread  1:   4.625142 s
+Threads:  4 | SUM TIME :   2.479699 s
+Thread  0:   2.479634 s
+Thread  1:   2.456259 s
+Thread  2:   2.465953 s
+Thread  3:   2.427830 s
+Threads:  8 | SUM TIME :   2.464865 s
+Thread  0:   2.311808 s
+Thread  1:   2.464755 s
+Thread  2:   2.295878 s
+Thread  3:   2.362619 s
+Thread  4:   2.449548 s
+Thread  5:   2.400762 s
+Thread  6:   2.444914 s
+Thread  7:   2.405351 s
+
+Filter size: 80
+Threads:  1 | SUM TIME :  36.751992 s
+Thread  0:  36.751789 s
+Threads:  2 | SUM TIME :  18.373433 s
+Thread  0:  18.256320 s
+Thread  1:  18.373350 s
+Threads:  4 | SUM TIME :   9.926706 s
+Thread  0:   9.774198 s
+Thread  1:   9.833867 s
+Thread  2:   9.861080 s
+Thread  3:   9.926431 s
+Threads:  8 | SUM TIME :  11.249711 s
+Thread  0:  10.324130 s
+Thread  1:  11.235378 s
+Thread  2:  11.172503 s
+Thread  3:  10.803582 s
+Thread  4:  11.204675 s
+Thread  5:  10.826741 s
+Thread  6:  11.241196 s
+Thread  7:  11.149977 s
