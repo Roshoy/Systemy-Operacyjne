@@ -157,7 +157,7 @@ void filtering_function(int x){
             }
         }
         //printf("s[%d][%d] = %f\n", x, y, s);
-        
+        if(s<0) s = -s;
         result_img[x][y] = round(s);
     }
 }

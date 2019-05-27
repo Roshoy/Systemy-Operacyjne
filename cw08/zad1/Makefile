@@ -7,6 +7,9 @@ main: main.c
 filter_gen: filter_gen.c
 	gcc filter_gen.c -o filter_gen
 
+simple_f: simple_filter.c
+	gcc simple_filter.c -o simple_filter
+
 test:
 	echo "Image size: 640x480" > Times.txt
 	echo "Type: BLOCK" >> Times.txt
